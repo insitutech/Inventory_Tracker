@@ -1,0 +1,14 @@
+# Core dependencies
+pyodbc>=4.0.39
+requests>=2.31.0
+schedule>=1.2.0
+
+# Optional dependencies for enhanced functionality
+python-dotenv>=1.0.0
+colorama>=0.4.6
+
+# Development dependencies (optional)
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.0.0
+flake8>=6.0.0
