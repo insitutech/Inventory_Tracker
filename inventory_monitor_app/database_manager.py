@@ -136,24 +136,36 @@ class DatabaseManager:
             raise
     
     def get_access_inventory(self) -> List[Dict[str, Any]]:
-        """Get inventory data from Access database."""
+        """Get inventory data from Access database using QBApp banner logic."""
         connection = self._get_connection('access')
         if not connection:
             logger.error("Access database connection not available")
             return []
         
         try:
-            # Query Access database for supply inventory
-            # Based on the tempSupplyInventoryNew table structure from the original code
+            # Query Access database using the exact QBApp banner logic
             query = """
             SELECT 
-                PartNumber,
-                PartName,
-                QuantityReceived,
-                QuantityConverted,
-                InProcessQuantity
-            FROM tempSupplyInventoryNew
-            ORDER BY PartNumber
+                s.PartNumber,
+                s.PartName,
+                COALESCE(SUM(r.QuantityReceived), 0) as TotalReceived,
+                COALESCE(SUM(lt.QuantityConverted), 0) as TotalConverted,
+                (COALESCE(SUM(r.QuantityReceived), 0) - COALESCE(SUM(lt.QuantityConverted), 0)) as OnHand
+            FROM tblSupplies s
+            LEFT JOIN tblReceiving r ON s.PartID = r.PartNumber AND r.QuantityReceived IS NOT NULL
+            LEFT JOIN (
+                SELECT 
+                    l.LotIssue,
+                    ltt.PartNumber,
+                    ltt.QuantityConverted
+                FROM tblLots l
+                INNER JOIN tblLotTracking ltt ON l.LotIssue = ltt.LotIssue
+                WHERE ltt.QuantityConverted IS NOT NULL
+            ) lt ON s.PartID = lt.PartNumber
+            WHERE s.PartNumber IS NOT NULL
+            GROUP BY s.PartNumber, s.PartName
+            HAVING (COALESCE(SUM(r.QuantityReceived), 0) - COALESCE(SUM(lt.QuantityConverted), 0)) > 0
+            ORDER BY s.PartNumber
             """
             
             cursor = connection.cursor()
@@ -161,24 +173,30 @@ class DatabaseManager:
             
             inventory_items = []
             for row in cursor.fetchall():
-                # Calculate on-hand quantity: Received - Converted + InProcess
-                qty_received = row[2] if row[2] is not None else 0
-                qty_converted = row[3] if row[3] is not None else 0
-                qty_in_process = row[4] if row[4] is not None else 0
-                on_hand = qty_received - qty_converted + qty_in_process
+                part_number = row[0]
+                part_name = row[1]
+                total_received = row[2] if row[2] is not None else 0
+                total_converted = row[3] if row[3] is not None else 0
+                on_hand = row[4] if row[4] is not None else 0
                 
-                item = {
-                    'part_number': row[0],
-                    'part_name': row[1],
-                    'quantity_received': qty_received,
-                    'quantity_converted': qty_converted,
-                    'quantity_in_process': qty_in_process,
-                    'quantity_on_hand': max(0, on_hand),  # Ensure non-negative
-                    'source': 'access'
-                }
-                inventory_items.append(item)
+                # Only include items that match the balloon/stent criteria from QBApp
+                if (part_number.startswith('19T') or part_number.startswith('19S') or 
+                    part_number.startswith('19N') or part_number.startswith('22PM') or
+                    part_number.startswith('22C') or part_number.startswith('18') or 
+                    (part_number.startswith('17') and not part_number.endswith('MM')) or 
+                    part_number.startswith('15H')):
+                    
+                    item = {
+                        'part_number': part_number,
+                        'part_name': part_name,
+                        'quantity_received': total_received,
+                        'quantity_converted': total_converted,
+                        'quantity_on_hand': on_hand,  # OnHand = TotalReceived - TotalConverted (same as QBApp banner)
+                        'source': 'access'
+                    }
+                    inventory_items.append(item)
             
-            logger.info(f"Retrieved {len(inventory_items)} inventory items from Access database")
+            logger.info(f"Retrieved {len(inventory_items)} inventory items from Access database using QBApp logic")
             return inventory_items
             
         except pyodbc.Error as e:
