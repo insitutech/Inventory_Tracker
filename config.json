@@ -1,0 +1,40 @@
+{
+  "databases": {
+    "quickbooks": {
+      "connection_string": "Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\\Users\\User\\Documents\\Quickbooks database\\Insitu-aug8-24QBW.QBW;",
+      "enabled": false
+    },
+    "access": {
+      "connection_string": "Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=\\\\INSITU-SERV2022\\NetServ_2\\Manufacturing-Operations\\DATABASE\\Insitu Program MASTER.mdb;",
+      "enabled": true
+    }
+  },
+  "monitoring": {
+    "interval_minutes": 30,
+    "check_timeout_seconds": 300,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 60
+  },
+  "thresholds": {
+    "default_warning": 10,
+    "default_critical": 5,
+    "items": {}
+  },
+  "slack": {
+    "webhooks": [
+      {
+        "name": "Production Team",
+        "url": "https://hooks.slack.com/services/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",
+        "enabled": true
+      }
+    ],
+    "notification_cooldown_minutes": 60,
+    "include_item_details": true
+  },
+  "logging": {
+    "level": "INFO",
+    "file_path": "inventory_monitor.log",
+    "max_file_size_mb": 10,
+    "backup_count": 5
+  }
+}
