@@ -9,6 +9,13 @@ import time
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
+try:
+    from quickbooks_manager import QuickBooksManager
+    QBFC_AVAILABLE = True
+except ImportError:
+    QBFC_AVAILABLE = False
+    logging.warning("QBFC not available, QuickBooks will be disabled")
+
 logger = logging.getLogger(__name__)
 
 class DatabaseManager:

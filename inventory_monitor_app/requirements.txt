@@ -12,3 +12,5 @@ pytest>=7.4.0
 pytest-cov>=4.1.0
 black>=23.0.0
 flake8>=6.0.0
+
+pywin32>=306
