@@ -103,9 +103,20 @@ class InventoryMonitor:
         warning_threshold = thresholds['warning']
         critical_threshold = thresholds['critical']
         
-        # Check critical threshold first
+        # Determine previous level to make alerts edge-triggered (only on crossing)
+        previous_level = self.notification_history.get(f"{item_id}_last_level", 'normal')
+        
+        # Compute current level
         if current_qty <= critical_threshold:
-            if self._can_send_notification(item_id, 'critical'):
+            current_level = 'critical'
+        elif current_qty <= warning_threshold:
+            current_level = 'warning'
+        else:
+            current_level = 'normal'
+        
+        # Only alert when crossing into a new alert level
+        if current_level == 'critical':
+            if previous_level != 'critical' and self._can_send_notification(item_id, 'critical'):
                 alert = {
                     'item_id': item_id,
                     'display_name': display_name,
@@ -118,10 +129,12 @@ class InventoryMonitor:
                 }
                 alerts.append(alert)
                 self._update_notification_history(item_id, 'critical')
-        
-        # Check warning threshold
-        elif current_qty <= warning_threshold:
-            if self._can_send_notification(item_id, 'warning'):
+                # Track last notified level
+                self.notification_history[f"{item_id}_last_level"] = 'critical'
+                self._save_notification_history()
+        elif current_level == 'warning':
+            # If coming down from critical to warning, we still notify once for the change
+            if previous_level not in ('warning',) and self._can_send_notification(item_id, 'warning'):
                 alert = {
                     'item_id': item_id,
                     'display_name': display_name,
@@ -134,6 +147,13 @@ class InventoryMonitor:
                 }
                 alerts.append(alert)
                 self._update_notification_history(item_id, 'warning')
+                self.notification_history[f"{item_id}_last_level"] = 'warning'
+                self._save_notification_history()
+        else:
+            # Reset last level when back to normal so future crossings will trigger
+            if previous_level in ('warning', 'critical'):
+                self.notification_history[f"{item_id}_last_level"] = 'normal'
+                self._save_notification_history()
         
         return alerts
     
