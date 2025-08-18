@@ -150,28 +150,26 @@ class DatabaseManager:
             return []
         
         try:
-            # Query Access database using the exact QBApp banner logic
+            # Access-compatible query (uses Nz instead of COALESCE and simplifies JOIN conditions)
             query = """
             SELECT 
                 s.PartNumber,
                 s.PartName,
-                COALESCE(SUM(r.QuantityReceived), 0) as TotalReceived,
-                COALESCE(SUM(lt.QuantityConverted), 0) as TotalConverted,
-                (COALESCE(SUM(r.QuantityReceived), 0) - COALESCE(SUM(lt.QuantityConverted), 0)) as OnHand
-            FROM tblSupplies s
-            LEFT JOIN tblReceiving r ON s.PartID = r.PartNumber AND r.QuantityReceived IS NOT NULL
+                Nz(SUM(r.QuantityReceived), 0) AS TotalReceived,
+                Nz(SUM(lt.QuantityConverted), 0) AS TotalConverted,
+                Nz(SUM(r.QuantityReceived), 0) - Nz(SUM(lt.QuantityConverted), 0) AS OnHand
+            FROM (tblSupplies AS s
+            LEFT JOIN tblReceiving AS r ON s.PartID = r.PartNumber)
             LEFT JOIN (
                 SELECT 
-                    l.LotIssue,
                     ltt.PartNumber,
                     ltt.QuantityConverted
-                FROM tblLots l
-                INNER JOIN tblLotTracking ltt ON l.LotIssue = ltt.LotIssue
-                WHERE ltt.QuantityConverted IS NOT NULL
-            ) lt ON s.PartID = lt.PartNumber
+                FROM tblLots AS l
+                INNER JOIN tblLotTracking AS ltt ON l.LotIssue = ltt.LotIssue
+            ) AS lt ON s.PartID = lt.PartNumber
             WHERE s.PartNumber IS NOT NULL
             GROUP BY s.PartNumber, s.PartName
-            HAVING (COALESCE(SUM(r.QuantityReceived), 0) - COALESCE(SUM(lt.QuantityConverted), 0)) > 0
+            HAVING Nz(SUM(r.QuantityReceived), 0) - Nz(SUM(lt.QuantityConverted), 0) > 0
             ORDER BY s.PartNumber
             """
             
