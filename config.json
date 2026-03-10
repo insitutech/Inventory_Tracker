@@ -1,11 +1,11 @@
 {
   "databases": {
     "quickbooks": {
-      "connection_string": "Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\\Users\\User\\Documents\\Quickbooks database\\Insitu-aug8-24QBW.QBW;",
+      "connection_string": "Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:QUICKBOOKS-DATABASE-PATH;",
       "enabled": false
     },
     "access": {
-      "connection_string": "Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=\\\\INSITU-SERV2022\\NetServ_2\\Manufacturing-Operations\\DATABASE\\Insitu Program MASTER.mdb;",
+      "connection_string": "Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=ACCESS-DATABASE-PATH;",
       "enabled": true
     }
   },
@@ -24,7 +24,7 @@
     "webhooks": [
       {
         "name": "Production Team",
-        "url": "https://hooks.slack.com/services/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",
+        "url": "SLACK-HOOK-URL-FOR-CHANNEL",
         "enabled": true
       }
     ],
