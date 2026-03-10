@@ -4,6 +4,8 @@ Automated inventory monitoring tool that watches a Microsoft Access database, ch
 
 Built for tracking balloon and stent component supplies at InSitu.
 
+> **Note:** This repository is shared publicly as a portfolio piece to demonstrate work done for a company internal tool. It is **not open source** and is not intended to be plug-and-play for other environments. The database schema, part number conventions, and network paths are specific to InSitu's setup, so it will not work out of the box elsewhere without significant modification.
+
 ## What it does
 
 - Queries a Microsoft Access database every 30 minutes (configurable)
