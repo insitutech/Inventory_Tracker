@@ -144,8 +144,9 @@ class ConfigManager:
             raise ValueError("At least one Slack webhook must be enabled")
         
         for webhook in enabled_webhooks:
-            if not webhook.get('url') or webhook['url'] == 'YOUR_SLACK_WEBHOOK_URL_1':
-                raise ValueError(f"Invalid Slack webhook URL for {webhook.get('name', 'Unknown')}")
+            url = webhook.get('url', '')
+            if not url or url.startswith('YOUR_SLACK_WEBHOOK') or url == 'SLACK-HOOK-URL-FOR-CHANNEL':
+                raise ValueError(f"Invalid Slack webhook URL for {webhook.get('name', 'Unknown')} — replace the placeholder with a real webhook URL")
     
     def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value using dot notation."""

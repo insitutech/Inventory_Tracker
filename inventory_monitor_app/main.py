@@ -56,7 +56,7 @@ class InventoryMonitorApp:
         logger.info("Starting scheduled inventory monitoring...")
         
         # Schedule the monitoring job
-        schedule.every(self.config.get('monitoring_interval_minutes', 30)).minutes.do(self.run_once)
+        schedule.every(self.config.get('monitoring.interval_minutes', 30)).minutes.do(self.run_once)
         
         # Run once immediately
         self.run_once()

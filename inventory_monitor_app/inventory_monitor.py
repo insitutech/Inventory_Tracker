@@ -19,7 +19,7 @@ class InventoryMonitor:
         self.db_manager = database_manager
         self.slack_notifier = slack_notifier
         self.notification_history = {}
-        self.cooldown_file = Path("notification_cooldown.json")
+        self.cooldown_file = Path(__file__).parent / "notification_cooldown.json"
         self._load_notification_history()
     
     def _load_notification_history(self):

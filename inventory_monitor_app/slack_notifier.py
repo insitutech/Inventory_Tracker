@@ -17,7 +17,6 @@ class SlackNotifier:
         self.config = config_manager
         self.webhooks = self.config.get_enabled_slack_webhooks()
         self.session = requests.Session()
-        self.session.timeout = 30  # 30 second timeout
     
     def send_notification(self, message: str, color: str = 'good', title: str = None, 
                          fields: List[Dict[str, str]] = None) -> bool:
@@ -96,15 +95,15 @@ class SlackNotifier:
             response = self.session.post(
                 webhook['url'],
                 json=payload,
-                headers={'Content-Type': 'application/json'}
+                headers={'Content-Type': 'application/json'},
+                timeout=30
             )
             
             if response.status_code == 200:
-                response_data = response.json()
-                if response_data.get('ok') or response_data.get('ok') is None:
+                if response.text.strip() == 'ok':
                     return True
                 else:
-                    logger.error(f"Slack API error for {webhook['name']}: {response_data}")
+                    logger.error(f"Slack API error for {webhook['name']}: {response.text}")
                     return False
             else:
                 logger.error(f"HTTP error {response.status_code} for {webhook['name']}: {response.text}")
