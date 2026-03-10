@@ -1,7 +1,6 @@
 # Inventory Tracker
 
 Automated inventory monitoring tool that watches a Microsoft Access database, checks stock levels against configurable thresholds, and sends Slack alerts when items run low.
-
 Built for tracking balloon and stent component supplies at InSitu.
 
 > **Note:** This repository is shared publicly as a portfolio piece to demonstrate work done for a company internal tool. It is **not open source** and is not intended to be plug-and-play for other environments. The database schema, part number conventions, and network paths are specific to InSitu's setup, so it will not work out of the box elsewhere without significant modification.
@@ -10,8 +9,8 @@ Built for tracking balloon and stent component supplies at InSitu.
 
 - Queries a Microsoft Access database every 30 minutes (configurable)
 - Calculates on-hand quantity as `Total Received − Total Converted`
-- Fires a **warning** alert when stock drops to ≤ 10 units, and a **critical** alert at ≤ 5 units (both thresholds are configurable per item)
-- Alerts are **edge-triggered** — you only get notified when an item crosses into a new level, not on every check
+- Fires a warning alert when stock drops to ≤ 10 units, and a critical alert at ≤ 5 units (both thresholds are configurable per item)
+- You only get notified when an item crosses into a new level, not on every check
 - Sends grouped alerts to one or more Slack channels via incoming webhooks
 - Persists cooldown state between restarts so you don't get duplicate alerts after a restart
 
